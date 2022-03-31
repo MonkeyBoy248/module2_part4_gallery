@@ -4,7 +4,7 @@ import path from "path";
 import { Pictures } from "./gallery_pictures";
 import {setDateFormat, writeLogs} from "./log_format";
 import {isNodeError} from "./error_type_check";
-import { paths } from "../../config";
+import { paths } from "../config";
 
 
 export async function renameFile (req: Request, res: Response) {

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import {paths} from "../../config";
+import {paths} from "../config";
 
 let fileName = setDateFormat();
 
@@ -8,10 +8,9 @@ export function setDateFormat ()  {
   const timeZoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
   const currentDate = Date.now() - timeZoneOffset
   const dateAsISO = new Date(currentDate).toISOString();
-  const formattedISO = dateAsISO.replace('T', ' ')
-    .slice(0, dateAsISO.lastIndexOf('.'));
 
-  return formattedISO;
+  return dateAsISO.replace('T', ' ')
+    .slice(0, dateAsISO.lastIndexOf('.'));
 }
 
 setInterval(() => {
