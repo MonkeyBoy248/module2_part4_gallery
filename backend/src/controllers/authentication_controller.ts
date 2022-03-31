@@ -1,7 +1,7 @@
 import * as express from 'express';
 import {Request, Response} from "express";
 import { Controller } from "../interfaces/controller";
-import { authorized_users } from "../authorized_users_list";
+import { authorizedUsers } from "../authorized_users_list";
 import { User } from '../interfaces/user';
 import {AuthenticationErrorMessage, TokenObject} from "../interfaces/token_object";
 import {jwtManagement} from "../utils/jwt";
@@ -20,11 +20,11 @@ export class AuthenticationController implements Controller {
   }
 
   private isThisCorrectUser = (user: User): boolean => {
-    if (!authorized_users[user.email]) {
+    if (!authorizedUsers[user.email]) {
       return false;
     }
 
-    return authorized_users[user.email] === user.password;
+    return authorizedUsers[user.email] === user.password;
   }
 
   private sendAuthenticationResponse = async (req: Request, res: Response) => {
