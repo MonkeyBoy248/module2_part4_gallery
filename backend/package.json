@@ -2,17 +2,18 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "../build/backend/src/server.js",
+  "main": "../build/backend/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ../build/backend/src/server.js",
+    "start": "node ./build/backend/server.js",
     "copy-modules": "cp -R node_modules ./build/backend",
     "build": "tsc && npm run copy-modules && cp -R ./build ../build",
-    "start:backend": "nodemon ../build/backend/src/server.js"
+    "start:backend": "nodemon ../build/backend/server.js"
   },
   "devDependencies": {
     "@types/express": "4.17.13",
     "@types/jsonwebtoken": "8.5.8",
+    "@types/mongoose": "5.11.97",
     "@types/multer": "1.4.7",
     "@types/node": "17.0.22",
     "body-parser": "1.19.2",
@@ -20,12 +21,15 @@
     "express": "4.17.3",
     "multer": "1.4.4",
     "nodemon": "2.0.15",
-    "ts-node": "10.7.0"
+    "ts-node": "10.7.0",
+    "typescript": "4.6.3"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "jsonwebtoken": "8.5.1"
+    "jsonwebtoken": "8.5.1",
+    "mongodb": "4.4.1",
+    "mongoose": "6.2.9"
   }
 }
