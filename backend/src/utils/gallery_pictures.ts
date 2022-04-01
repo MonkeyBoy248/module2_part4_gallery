@@ -17,45 +17,46 @@ export class Pictures {
     }
   }
 
-  static async getPicturesFromDB () {
-    try {
-      const pictures = await imageModel.find();
+  static async getPicturesFromDB (page: number, limit: number) {
+    const picturesOnPage: object[] = [];
 
-      return pictures;
+    try {
+      for (let i = (page - 1) * limit; i < page * limit; i++) {
+        const picture = await imageModel.findOne({id: `${i}`}) as object;
+
+        if (picture) {
+          picturesOnPage.push(picture);
+        }
+      }
+
+      return picturesOnPage;
     } catch (err) {
       await errorLog(err, `${setDateFormat()} ${this.getPictures.name}`)
     }
   }
 
   static async getPicturesLength () {
-    const pictures = await this.getPicturesFromDB();
+    const picturesLength = await imageModel.count();
 
-    if (pictures) {
-      try {
-        return pictures.length;
-      } catch (err) {
-        await errorLog(err, "Failed to get pictures amount")
-      }
+    try {
+      return picturesLength;
+    } catch (err) {
+      await errorLog(err, "Failed to get pictures amount")
     }
   }
 
   static async countTotalPagesAmount (limit: number): Promise<number> {
-    const pictures = await this.getPicturesFromDB();
     const picturesPerPage = limit || 4;
     let totalPages: number;
 
-    if (pictures) {
-      const picturesTotal = pictures.length;
+    const picturesTotal = await this.getPicturesLength() || 0;
 
-      totalPages = picturesTotal % picturesPerPage === 0 ?
-        Math.floor(picturesTotal / picturesPerPage)
-        :
-        Math.floor(picturesTotal / picturesPerPage) + 1;
+    totalPages = picturesTotal % picturesPerPage === 0 ?
+      Math.floor(picturesTotal / picturesPerPage)
+      :
+      Math.floor(picturesTotal / picturesPerPage) + 1;
 
-      return totalPages;
-    }
-
-    return 0;
+    return totalPages;
   }
 }
 
