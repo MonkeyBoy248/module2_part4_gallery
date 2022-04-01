@@ -7,14 +7,14 @@ export async function addImagesToDB () {
   const imageMetadata = await getFileMetadata();
 
   for (let i = 0; i < imageNames.length; i++) {
-    if (await imageModel.exists({id: i})){
+    if (await imageModel.exists({id: `${i}`})){
       console.log('Collection is not empty');
       return false;
     }
 
     await imageModel.create(
       {
-        id: i,
+        id: `${i}`,
         path: imageNames[i],
         metadata: imageMetadata[i],
       }

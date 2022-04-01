@@ -3,14 +3,19 @@ export interface TokenObject {
   timestamp?: number;
 }
 
-
 export interface User {
   email: string;
   password: string;
 }
 
+interface Pictures {
+  id: number,
+  path: string,
+  metadata: object[];
+}
+
 export interface GalleryData {
-  objects: string[];
+  objects: Pictures[];
   page: number;
   total: number;
 }

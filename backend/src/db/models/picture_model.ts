@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 
 const imageSchema = new Schema<Picture>(
   {
-    id: Number,
+    id: String,
     path: String,
     metadata: Object
   }
