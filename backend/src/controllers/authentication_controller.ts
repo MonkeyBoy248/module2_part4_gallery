@@ -1,10 +1,10 @@
 import * as express from 'express';
 import {Request, Response} from "express";
 import { Controller } from "../interfaces/controller";
-import { authorizedUsers } from "../authorized_users_list";
 import { User } from '../interfaces/user';
 import {AuthenticationErrorMessage, TokenObject} from "../interfaces/token_object";
 import {jwtManagement} from "../utils/jwt";
+import {userModel} from "../db/models/user_model";
 
 export class AuthenticationController implements Controller {
   public path = '/authentication';
@@ -19,16 +19,18 @@ export class AuthenticationController implements Controller {
     return this.router.post(this.path, this.sendAuthenticationResponse);
   }
 
-  private isThisCorrectUser = (user: User): boolean => {
-    if (!authorizedUsers[user.email]) {
+  private isThisCorrectUser = async (user: User): Promise<boolean> => {
+    const authorizedUser = await userModel.findOne({email: user.email});
+
+    if (!authorizedUser) {
       return false;
     }
 
-    return authorizedUsers[user.email] === user.password;
+    return authorizedUser.password === user.password;
   }
 
   private sendAuthenticationResponse = async (req: Request, res: Response) => {
-    if (!this.isThisCorrectUser(req.body)) {
+    if (!await this.isThisCorrectUser(req.body)) {
       res.status(401).json(this.authenticationError)
       return;
     }
