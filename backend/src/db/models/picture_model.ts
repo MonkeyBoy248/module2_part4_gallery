@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
-import {Image} from "../../interfaces/image";
-import {Stats} from "fs";
+import {Picture} from "../../interfaces/picture";
 
 const { Schema } = mongoose;
 
-const imageSchema = new Schema<Image>(
+const imageSchema = new Schema<Picture>(
   {
     id: Number,
     path: String,
-    metadata: Stats
+    metadata: Object
   }
 )
 
