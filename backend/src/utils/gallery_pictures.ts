@@ -4,8 +4,6 @@ import {isNodeError} from "./error_type_check";
 import { paths } from "../config";
 
 export class Pictures {
-  public static PICTURES_PER_PAGE: number = 4;
-
   static async getPictures () {
     try {
       const fileNames = await fs.promises.readdir(paths.API_IMAGES_PATH);
@@ -31,14 +29,15 @@ export class Pictures {
     }
   }
 
-  static countTotalPagesAmount (pictures: string[]): number {
+  static countTotalPagesAmount (pictures: string[], limit: number): number {
+    const picturesPerPage = limit || 4;
     const picturesTotal = pictures.length;
     let totalPages: number;
   
-    if (picturesTotal % Pictures.PICTURES_PER_PAGE === 0 ) {
-      totalPages = Math.floor(picturesTotal / Pictures.PICTURES_PER_PAGE);
+    if (picturesTotal % picturesPerPage === 0 ) {
+      totalPages = Math.floor(picturesTotal / picturesPerPage);
     } else {
-      totalPages = Math.floor(picturesTotal / Pictures.PICTURES_PER_PAGE) + 1;
+      totalPages = Math.floor(picturesTotal / picturesPerPage) + 1;
     }
   
     return totalPages;
