@@ -5,7 +5,7 @@ export function redirectToTheGalleryPage () {
   const currentLimit = currentUrl.searchParams.get('limit');
 
   if (!currentPage) {
-    window.location.replace(`${galleryUrl}?page=1&${currentLimit}`);
+    window.location.replace(`${galleryUrl}?page=1&limit=4`);
   } else {
     window.location.replace(`${galleryUrl}?page=${currentPage}&limit=${currentLimit}`);
   }
