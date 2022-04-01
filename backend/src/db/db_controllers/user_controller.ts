@@ -5,7 +5,7 @@ export async function addUsersToDB () {
   const authorizedUserProperties = Object.entries(authorizedUsers);
 
   for (let [email, password] of authorizedUserProperties) {
-    if (!await userModel.exists({email: email})) {
+    if (await userModel.exists({email: email})) {
       console.log('Collection is not empty');
       return false;
     }
