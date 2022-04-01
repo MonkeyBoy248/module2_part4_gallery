@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 import { Pictures } from "./gallery_pictures";
-import {setDateFormat, writeLogs} from "./log_format";
-import {isNodeError} from "./error_type_check";
+import {setDateFormat} from "./log_format";
 import { paths } from "../config";
+import {errorLog} from "./error_log";
 
 
 export async function renameFile (req: Request, res: Response) {
@@ -22,8 +22,7 @@ export async function renameFile (req: Request, res: Response) {
       res.sendStatus(200);
     }
   } catch (err) {
-    const errMessage = isNodeError(err) ? err.code : "File rename failed";
-    await writeLogs(`${setDateFormat()} ${renameFile.name} ${errMessage}`);
+    await errorLog(err, `${setDateFormat()} ${renameFile.name}`);
 
     res.sendStatus(500);
   }

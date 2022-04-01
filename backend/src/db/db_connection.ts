@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { userModel } from "./models/user_model";
-import { imageModel } from "./models/picture_model";
+import {errorLog} from "../utils/error_log";
 
 dotenv.config();
 
@@ -13,6 +12,6 @@ export async function connectDB () {
 
     console.log(`DB connected: ${dbConnection.connection.host}`)
   } catch (err) {
-    console.log(err);
+    await errorLog(err, `DB connection failed`)
   }
 }
