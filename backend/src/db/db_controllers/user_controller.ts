@@ -1,23 +1,23 @@
 import {authorizedUsers} from "../../authorized_users_list";
 import {userModel} from "../models/user_model";
 
-export async function createAuthorizedUsers () {
+export async function addUsersToDB () {
   const authorizedUserProperties = Object.entries(authorizedUsers);
 
   for (let [email, password] of authorizedUserProperties) {
-    if (Object.keys(await userModel.find({email: email})).length !== 0) {
+    if (!await userModel.exists({email: email})) {
       console.log('Collection is not empty');
       return false;
     }
 
-    const user = await userModel.create(
+    await userModel.create(
       {
         email,
         password
       }
     )
 
-    console.log(user);
+    console.log("All users added");
   }
 }
 
