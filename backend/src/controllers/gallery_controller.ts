@@ -29,11 +29,11 @@ export class GalleryController implements Controller {
     })
   }
 
-  private createGalleryResponseObject = (objects: string[], total: number, page: string, limit: number ): GalleryObject => {
+  private createGalleryResponseObject = async (total: number, page: string, limit: number ): Promise<GalleryObject> => {
+    const objects = await Pictures.getPicturesFromDB() || [] as Pictures[];
     const pageNumber = Number(page);
     const picturesPerPage = limit || 4;
-    const sortedObjects = this.sortFileNames(objects);
-    const objectsTraversePattern = sortedObjects.slice((pageNumber - 1) * picturesPerPage, pageNumber * picturesPerPage);
+    const objectsTraversePattern = objects.slice((pageNumber - 1) * picturesPerPage, pageNumber * picturesPerPage);
     const response: GalleryObject = {
       objects: objectsTraversePattern,
       total,
@@ -44,10 +44,9 @@ export class GalleryController implements Controller {
   }
 
   private sendGalleryResponse = async (req: Request, res: Response) => {
-    const pictureNames = await Pictures.getPictures();
-    const totalPagesAmount = Pictures.countTotalPagesAmount(pictureNames!, Number(req.query.limit))
+    const totalPagesAmount = await Pictures.countTotalPagesAmount(Number(req.query.limit))
     const pageNumber = req.query.page ? String(req.query.page) : '1';
-    const responseObject = this.createGalleryResponseObject(pictureNames!, totalPagesAmount, pageNumber, Number(req.query.limit));
+    const responseObject = await this.createGalleryResponseObject(totalPagesAmount, pageNumber, Number(req.query.limit));
 
     if (Number(pageNumber) <= 0 || Number(pageNumber) > totalPagesAmount) {
       res.sendStatus(404);
