@@ -1,7 +1,5 @@
-npm run build:all
-rm -R build/
+rm -R build/ || true
 mkdir build/
-mv backend/build/backend build/
+npm run build:all
 npm run copy:pages
 npm run copy:resources
-npm run rm-build:backend

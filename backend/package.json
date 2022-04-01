@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./build/backend/server.js",
     "copy-modules": "cp -R node_modules ./build/backend",
-    "build": "tsc && npm run copy-modules && cp -R ./build ../build",
+    "build": "tsc && npm run copy-modules && cp -R ./build/backend ../build",
     "start:backend": "nodemon ../build/backend/server.js"
   },
   "devDependencies": {
