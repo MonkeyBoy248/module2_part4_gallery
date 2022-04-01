@@ -57,7 +57,7 @@ async function getPicturesData (): Promise<void>{
       checkTokenValidity();
     } catch (err){
         if (err instanceof InvalidPageError) {
-          const nonexistentPageNumber = url.slice(url.indexOf('=') + 1);
+          const nonexistentPageNumber = new URL(url).searchParams.get('page');
 
           createErrorMessageTemplate(
             `There is no page with number ${nonexistentPageNumber}.`, 
@@ -133,9 +133,13 @@ function redirectToTheTargetPage (e: Event) {
   ListenerRemover.removeEventListeners(galleryEventsArray);
 
   if (target.getAttribute('error-type') === 'wrong-page-number') {
-    window.location.replace('gallery.html?page=1')
+    window.location.replace(
+      `gallery.html?page=1&limit=${env.currentUrl.searchParams.get('limit')}`
+    )
   } else {
-    window.location.replace(`index.html?currentPage=${env.currentUrl.searchParams.get('page')}`);
+    window.location.replace(
+      `index.html?currentPage=${env.currentUrl.searchParams.get('page')}&limit=${env.currentUrl.searchParams.get('limit')}`
+    );
   }
 }
 
@@ -215,8 +219,8 @@ function showSelectedFilePath () {
   }
 }
 
-function setNewUrl (params: URLSearchParams | string): void {
-  window.location.href = `${env.protocol}://${env.hostName}:${env.port}/${env.galleryUrl}?page=${params}`;
+function setNewUrl (pageNumber: string): void {
+  window.location.href = `${env.protocol}://${env.hostName}:${env.port}/${env.galleryUrl}?page=${pageNumber}&limit=${env.currentUrl.searchParams.get('limit')}`;
 }
 
 function showMessage (text: string): void {
@@ -240,7 +244,9 @@ function redirectWhenTokenExpires (delay: number): void {
     updateMessageBeforeRedirection(delay / 1000);
     ListenerRemover.removeEventListeners(galleryEventsArray);
     setTimeout(() => {
-      window.location.replace(`${env.loginUrl}?currentPage=${env.currentUrl.searchParams.get('page')}`);
+      window.location.replace(
+        `${env.loginUrl}?currentPage=${env.currentUrl.searchParams.get('page')}&limit=${env.currentUrl.searchParams.get('limit')}`
+      );
     }, delay)
   }
 }
@@ -264,10 +270,10 @@ function setPageNumber () {
 
 function setCurrentPageUrl (): string {
   if (!env.currentUrl.searchParams.get('page')) {
-    return `${env.galleryServerUrl}?page=1`
+    return `${env.galleryServerUrl}?page=1&limit=${env.currentUrl.searchParams.get('limit')}`
   }
 
-   return `${env.galleryServerUrl}?page=${env.currentUrl.searchParams.get('page')}`;
+   return `${env.galleryServerUrl}?page=${env.currentUrl.searchParams.get('page')}&limit=${env.currentUrl.searchParams.get('limit')}`;
 }
 
 async function changeCurrentPage (e: Event): Promise<void> {
