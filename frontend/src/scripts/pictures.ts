@@ -23,7 +23,7 @@ const galleryEventsArray: CustomEventListener[] = [
   {target: galleryUploadInput, type: 'change', handler: showSelectedFilePath}
 ]
 
-
+checkTokenValidity();
 
 async function getPicturesData (): Promise<void>{
   const url = setCurrentPageUrl();
@@ -54,7 +54,6 @@ async function getPicturesData (): Promise<void>{
       createPictureTemplate(data);
       createLinksTemplate(data.total);
       setPageNumber();
-      checkTokenValidity();
     } catch (err){
         if (err instanceof InvalidPageError) {
           const nonexistentPageNumber = new URL(url).searchParams.get('page');
@@ -123,7 +122,7 @@ function checkTokenValidity () {
   setInterval(() => {
     Token.deleteToken();
     redirectWhenTokenExpires(5000);
-  }, 60000)
+  }, 30000);
 }
 
 function redirectToTheTargetPage (e: Event) {
@@ -151,7 +150,7 @@ function createPictureTemplate (pictures: GalleryData): void {
     const imageWrapper = picture.children[0];
     const image = imageWrapper.querySelector('.gallery__img') as HTMLElement;
     
-    image.setAttribute('src', `http://localhost:8000/api_images/${object}`);
+    image.setAttribute('src', `http://localhost:8000/api_images/${object.path}`);
     galleryPhotos.insertAdjacentElement('beforeend', imageWrapper);
   }
 }
@@ -238,20 +237,22 @@ function updateMessageBeforeRedirection (timer: number): void {
 }
 
 function redirectWhenTokenExpires (delay: number): void {
-  console.log('You\'re in redirect timer');
+  const limit = env.currentUrl.searchParams.get('limit');
+  const pageNumber = env.currentUrl.searchParams.get('page');
 
   if (!Token.getToken()) {
     updateMessageBeforeRedirection(delay / 1000);
     ListenerRemover.removeEventListeners(galleryEventsArray);
     setTimeout(() => {
       window.location.replace(
-        `${env.loginUrl}?currentPage=${env.currentUrl.searchParams.get('page')}&limit=${env.currentUrl.searchParams.get('limit')}`
+        `${env.loginUrl}?currentPage=${pageNumber}&limit=${limit}`
       );
     }, delay)
   }
 }
 
 function setPageNumber () {
+  const pageNumber = env.currentUrl.searchParams.get('page');
   const currentActiveLink = pagesLinksList.querySelector('.active');
   
   for (let item of pagesLinksList.children) {
@@ -261,7 +262,7 @@ function setPageNumber () {
       item.setAttribute('page-number', link.textContent);
     }
     
-    if (item.getAttribute('page-number') === env.currentUrl.searchParams.get('page')) {
+    if (item.getAttribute('page-number') === pageNumber) {
       currentActiveLink?.classList.remove('active');
       item.classList.add('active');
     }
@@ -269,11 +270,14 @@ function setPageNumber () {
 }
 
 function setCurrentPageUrl (): string {
+  const limit = env.currentUrl.searchParams.get('limit');
+  const pageNumber = env.currentUrl.searchParams.get('page');
+
   if (!env.currentUrl.searchParams.get('page')) {
-    return `${env.galleryServerUrl}?page=1&limit=${env.currentUrl.searchParams.get('limit')}`
+    return `${env.galleryServerUrl}?page=1&limit=${limit}`
   }
 
-   return `${env.galleryServerUrl}?page=${env.currentUrl.searchParams.get('page')}&limit=${env.currentUrl.searchParams.get('limit')}`;
+   return `${env.galleryServerUrl}?page=${pageNumber}&limit=${limit}`;
 }
 
 async function changeCurrentPage (e: Event): Promise<void> {
@@ -293,6 +297,8 @@ async function changeCurrentPage (e: Event): Promise<void> {
     }
   }
 }
+
+
 
 document.addEventListener('DOMContentLoaded', getPicturesData);
 pagesLinksList.addEventListener('click', changeCurrentPage);
