@@ -8,7 +8,7 @@ import { paths } from "./config";
 import { Logger } from "./middleware/logger";
 import {connectDB} from "./db/db_connection";
 import {addUsersToDB} from "./db/db_controllers/user_controller";
-import {addImagesToDB} from "./db/db_controllers/image_controller";
+import {addImagesToDB, deleteNonexistentPicturesFromDB} from "./db/db_controllers/image_controller";
 
 dotenv.config();
 
@@ -24,9 +24,11 @@ const hostname = process.env.HOSTNAME || 'localhost';
 
 console.log('port', process.env.PORT);
 
-connectDB();
-addUsersToDB();
-addImagesToDB()
+connectDB()
+  .then(() => addUsersToDB())
+  .then(() => deleteNonexistentPicturesFromDB())
+  .then(() => addImagesToDB())
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
