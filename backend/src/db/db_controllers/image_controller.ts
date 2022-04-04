@@ -1,10 +1,10 @@
 import { imageModel } from "../models/picture_model";
-import { getFileMetadata } from "../../utils/file_metadata";
 import { Pictures } from "../../utils/gallery_pictures";
+import {Picture} from "../../interfaces/picture";
 
 export async function addImagesToDB () {
   const imageNames = await Pictures.getPictures() || [];
-  const imageMetadata = await getFileMetadata();
+  const imageMetadata = await Pictures.getFileMetadata();
 
   for (let i = 0; i < imageNames.length; i++) {
     if (await imageModel.exists({id: `${i}`})){
@@ -21,6 +21,21 @@ export async function addImagesToDB () {
     )
 
     console.log('All pictures added');
+  }
+}
+
+export async function addUserImageToDB (imageObject: Picture) {
+  await imageModel.create(imageObject);
+}
+
+export async function deleteNonexistentPicturesFromDB () {
+  const pictureNames =  await Pictures.getPictures();
+
+  if (await imageModel.exists({"id": {$regex: 'user', $options: 'g'}}) &&
+   pictureNames?.filter((item) => {
+     item.includes('user')
+   }).length === 0) {
+    await imageModel.deleteMany({"id": {$regex: 'user', $options: 'g'}});
   }
 }
 
