@@ -3,6 +3,7 @@ import { Token } from "../modules/token_management.js";
 import { ImageUploadError, InvalidPageError, TokenError } from "../modules/errors.js";
 import { GalleryData } from "../modules/interfaces.js";
 import * as env from "../modules/environment_variables.js";
+import {currentUrl} from "../modules/environment_variables.js";
 
 const galleryPhotos = document.querySelector('.gallery__photos') as HTMLElement;
 const headerFilesContainer = document.querySelector('.header__files-container') as HTMLElement;
@@ -15,15 +16,16 @@ const galleryLinkTemplate = document.querySelector('.gallery__link-template') as
 const galleryUploadForm = document.querySelector('.header__upload-form') as HTMLFormElement;
 const galleryUploadLabel = galleryUploadForm.querySelector('.header__upload-label') as HTMLElement;
 const galleryUploadInput = galleryUploadForm.querySelector('.header__upload-input') as HTMLInputElement;
+const headerLimitInput = document.querySelector('.header__limit-input') as HTMLInputElement;
+const setLimitButton = document.querySelector('.header__set-limit-button') as HTMLButtonElement;
 const galleryEventsArray: CustomEventListener[] = [
   {target: document, type: 'DOMContentLoaded', handler: setCurrentPageUrl},
   {target: pagesLinksList, type: 'click', handler: changeCurrentPage},
   {target: galleryErrorContainer, type: 'click', handler: redirectToTheTargetPage},
   {target: galleryUploadForm, type: 'submit', handler: uploadUserFile},
-  {target: galleryUploadInput, type: 'change', handler: showSelectedFilePath}
+  {target: galleryUploadInput, type: 'change', handler: showSelectedFilePath},
+  {target: setLimitButton, type: 'click', handler: setLimit}
 ]
-
-
 
 async function getPicturesData (): Promise<void>{
   const url = setCurrentPageUrl();
@@ -50,14 +52,13 @@ async function getPicturesData (): Promise<void>{
       }
       
       const data: GalleryData = await response.json();
-      
+
       createPictureTemplate(data);
       createLinksTemplate(data.total);
       setPageNumber();
-      checkTokenValidity();
     } catch (err){
         if (err instanceof InvalidPageError) {
-          const nonexistentPageNumber = url.slice(url.indexOf('=') + 1);
+          const nonexistentPageNumber = new URL(url).searchParams.get('page');
 
           createErrorMessageTemplate(
             `There is no page with number ${nonexistentPageNumber}.`, 
@@ -68,8 +69,7 @@ async function getPicturesData (): Promise<void>{
           createErrorMessageTemplate(
             'Invalid token. Please, log in',
             'invalid-token',
-            'authentication page'
-          );
+            'authentication page');
         }
 
         console.log(err);
@@ -120,10 +120,15 @@ async function sendUserPicture () {
 }
 
 function checkTokenValidity () {
+  if (!Token.getToken()) {
+    redirectWhenTokenExpires(5000);
+    return;
+  }
+
   setInterval(() => {
     Token.deleteToken();
     redirectWhenTokenExpires(5000);
-  }, 60000)
+  }, 1000);
 }
 
 function redirectToTheTargetPage (e: Event) {
@@ -133,9 +138,13 @@ function redirectToTheTargetPage (e: Event) {
   ListenerRemover.removeEventListeners(galleryEventsArray);
 
   if (target.getAttribute('error-type') === 'wrong-page-number') {
-    window.location.replace('gallery.html?page=1')
+    window.location.replace(
+      `gallery.html?page=1&limit=${env.currentUrl.searchParams.get('limit')}`
+    )
   } else {
-    window.location.replace(`index.html?currentPage=${env.currentUrl.searchParams.get('page')}`);
+    window.location.replace(
+      `index.html?currentPage=${env.currentUrl.searchParams.get('page')}&limit=${env.currentUrl.searchParams.get('limit')}`
+    );
   }
 }
 
@@ -147,7 +156,7 @@ function createPictureTemplate (pictures: GalleryData): void {
     const imageWrapper = picture.children[0];
     const image = imageWrapper.querySelector('.gallery__img') as HTMLElement;
     
-    image.setAttribute('src', `http://localhost:8000/api_images/${object}`);
+    image.setAttribute('src', `http://localhost:8000/api_images/${object.path}`);
     galleryPhotos.insertAdjacentElement('beforeend', imageWrapper);
   }
 }
@@ -215,8 +224,10 @@ function showSelectedFilePath () {
   }
 }
 
-function setNewUrl (params: URLSearchParams | string): void {
-  window.location.href = `${env.protocol}://${env.hostName}:${env.port}/${env.galleryUrl}?page=${params}`;
+function setNewUrl (): void {
+  const pageNumber = env.currentUrl.searchParams.get('page');
+  const limit = env.currentUrl.searchParams.get('limit');
+  window.location.href = `${env.protocol}://${env.hostName}:${env.port}/${env.galleryUrl}?page=${pageNumber}&limit=${limit}`;
 }
 
 function showMessage (text: string): void {
@@ -234,18 +245,22 @@ function updateMessageBeforeRedirection (timer: number): void {
 }
 
 function redirectWhenTokenExpires (delay: number): void {
-  console.log('You\'re in redirect timer');
+  const limit = env.currentUrl.searchParams.get('limit');
+  const pageNumber = env.currentUrl.searchParams.get('page');
 
   if (!Token.getToken()) {
     updateMessageBeforeRedirection(delay / 1000);
     ListenerRemover.removeEventListeners(galleryEventsArray);
     setTimeout(() => {
-      window.location.replace(`${env.loginUrl}?currentPage=${env.currentUrl.searchParams.get('page')}`);
+      window.location.replace(
+        `${env.loginUrl}?currentPage=${pageNumber}&limit=${limit}`
+      );
     }, delay)
   }
 }
 
 function setPageNumber () {
+  const pageNumber = env.currentUrl.searchParams.get('page');
   const currentActiveLink = pagesLinksList.querySelector('.active');
   
   for (let item of pagesLinksList.children) {
@@ -255,19 +270,42 @@ function setPageNumber () {
       item.setAttribute('page-number', link.textContent);
     }
     
-    if (item.getAttribute('page-number') === env.currentUrl.searchParams.get('page')) {
+    if (item.getAttribute('page-number') === pageNumber) {
       currentActiveLink?.classList.remove('active');
       item.classList.add('active');
     }
   }
 }
 
+function setLimit () {
+  const currentLimitValue = headerLimitInput.value;
+
+ isNaN(Number(currentLimitValue)) ?
+   currentUrl.searchParams.set('limit', '4')
+   :
+   currentUrl.searchParams.set('limit', currentLimitValue);
+
+  setNewUrl();
+}
+
+function setLimitPlaceholder () {
+  const lastLimitValue = currentUrl.searchParams.get('limit');
+  const placeholderTemplate = `Current limit value:`;
+  headerLimitInput.placeholder = isNaN(Number(lastLimitValue)) ?
+    `${placeholderTemplate} 4`
+    :
+    `${placeholderTemplate} ${lastLimitValue}`
+}
+
 function setCurrentPageUrl (): string {
+  const limit = env.currentUrl.searchParams.get('limit');
+  const pageNumber = env.currentUrl.searchParams.get('page');
+
   if (!env.currentUrl.searchParams.get('page')) {
-    return `${env.galleryServerUrl}?page=1`
+    return `${env.galleryServerUrl}?page=1&limit=${limit}`
   }
 
-   return `${env.galleryServerUrl}?page=${env.currentUrl.searchParams.get('page')}`;
+   return `${env.galleryServerUrl}?page=${pageNumber}&limit=${limit}`;
 }
 
 async function changeCurrentPage (e: Event): Promise<void> {
@@ -279,7 +317,8 @@ async function changeCurrentPage (e: Event): Promise<void> {
 
   if (target !== pagesLinksList ) {
     if (currentActiveLink !== targetClosestLi) {
-      setNewUrl(targetClosestLi?.getAttribute('page-number')!);
+      currentUrl.searchParams.set('page', targetClosestLi?.getAttribute('page-number')!)
+      setNewUrl();
       await getPicturesData();
       
       currentActiveLink?.classList.remove('active');
@@ -288,11 +327,15 @@ async function changeCurrentPage (e: Event): Promise<void> {
   }
 }
 
+checkTokenValidity();
+setLimitPlaceholder();
+
 document.addEventListener('DOMContentLoaded', getPicturesData);
 pagesLinksList.addEventListener('click', changeCurrentPage);
 galleryErrorContainer.addEventListener('click', redirectToTheTargetPage);
 galleryUploadForm.addEventListener('submit', uploadUserFile);
 galleryUploadInput.addEventListener('change', showSelectedFilePath);
+setLimitButton.addEventListener('click', setLimit);
 
 
 

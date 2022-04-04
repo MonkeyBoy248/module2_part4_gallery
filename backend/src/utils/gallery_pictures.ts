@@ -1,47 +1,69 @@
 import * as fs from 'fs';
 import {setDateFormat, writeLogs} from "./log_format";
 import {isNodeError} from "./error_type_check";
-import { paths } from "../../config";
+import { paths } from "../config";
+import {imageModel} from "../db/models/picture_model";
+import {errorLog} from "./error_log";
+import {Stats} from "fs";
+import path from "path";
 
 export class Pictures {
-  public static PICTURES_PER_PAGE: number = 4;
-
   static async getPictures () {
     try {
       const fileNames = await fs.promises.readdir(paths.API_IMAGES_PATH);
       return fileNames;
     } catch (err) {
-      const errMessage = isNodeError(err) ? err.code : "File rename failed";
+      const errMessage = isNodeError(err) ? err.code : "File reading error";
 
       await writeLogs(`${setDateFormat()} ${this.getPictures.name} ${errMessage}`);
     }
   }
 
-  static async getPicturesLength () {
-    const pictures = await this.getPictures();
+  static async getPicturesAmount () {
+    return imageModel.count();
+  }
 
-    if (pictures) {
-      try {
-        return pictures.length;
-      } catch (err) {
-        const errMessage = err instanceof Error ? err.message : "Pictures amount calculation failed";
+  static async getPicturesFromDB () {
+    try {
+      const pictures = await imageModel.find();
 
-        await writeLogs(errMessage);
-      }
+      return pictures;
+    } catch (err) {
+      await errorLog(err, `${setDateFormat()} ${this.getPictures.name}`)
     }
   }
 
-  static countTotalPagesAmount (pictures: string[]): number {
-    const picturesTotal = pictures.length;
+  static async countTotalPagesAmount (limit: number): Promise<number> {
+    const picturesPerPage = limit || 4;
+    const pictures = await this.getPicturesFromDB();
     let totalPages: number;
-  
-    if (picturesTotal % Pictures.PICTURES_PER_PAGE === 0 ) {
-      totalPages = Math.floor(picturesTotal / Pictures.PICTURES_PER_PAGE);
-    } else {
-      totalPages = Math.floor(picturesTotal / Pictures.PICTURES_PER_PAGE) + 1;
+
+    if (!pictures) {
+      return 0;
     }
-  
+
+    const picturesTotal = await this.getPicturesAmount() || 0;
+
+    totalPages = picturesTotal % picturesPerPage === 0 ?
+      Math.floor(picturesTotal / picturesPerPage)
+      :
+      Math.floor(picturesTotal / picturesPerPage) + 1;
+
     return totalPages;
+  }
+
+  static getFileMetadata = async () => {
+    const { API_IMAGES_PATH } = paths;
+    const imageNames = await Pictures.getPictures();
+    const metadataArray: Stats[] = [];
+
+    if (imageNames) {
+      for (let name of imageNames) {
+        metadataArray.push(await fs.promises.stat(path.join(API_IMAGES_PATH, name)));
+      }
+    }
+
+    return metadataArray;
   }
 }
 

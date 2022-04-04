@@ -12,20 +12,29 @@
   <header class="header">
     <div class="header__container _container">
       <div class="header__inner">
-        <h1 class="header__title">Gallery</h1>
-        <div class="header__upload-wrapper">
-          <form class="header__upload-form">
-            <label class="header__upload-label" for="header__upload-input">
-              Select a file
-            </label>
-            <input class="header__upload-input _hidden"
-                   type="file"
-                   name="picturedata"
-                   id="header__upload-input"
-            >
-            <input class="header__upload-submit-button" type="submit" value="Upload file">
-          </form>
-          <div class="header__files-container"></div>
+        <div class="header__title-wrapper">
+          <h1 class="header__title">Gallery</h1>
+          <div class="header__upload-wrapper">
+            <form class="header__upload-form">
+              <label class="header__upload-label" for="header__upload-input">
+                Select a file
+              </label>
+              <input class="header__upload-input _hidden"
+                     type="file"
+                     name="picturedata"
+                     id="header__upload-input"
+              >
+              <input class="header__upload-submit-button" type="submit" value="Upload file">
+            </form>
+            <div class="header__files-container"></div>
+          </div>
+        </div>
+        <div class="header__options-bar">
+          <div class="header__limit-wrapper">
+            <label class="header__limit-label" for="header__limit-input">Pictures per page</label>
+            <input class="header__limit-input" type="text" id="header__limit-input">
+            <button class="header__set-limit-button">Set limit</button>
+          </div>
         </div>
       </div>
     </div>
