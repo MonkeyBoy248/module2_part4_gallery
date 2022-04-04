@@ -23,9 +23,9 @@ export class Pictures {
     return imageModel.count();
   }
 
-  static async getPicturesFromDB () {
+  static async getPicturesFromDB (page: number, limit: number) {
     try {
-      const pictures = await imageModel.find();
+      const pictures = await imageModel.find({}, null, {skip: limit * page - limit, limit: limit});
 
       return pictures;
     } catch (err) {
@@ -35,12 +35,7 @@ export class Pictures {
 
   static async countTotalPagesAmount (limit: number): Promise<number> {
     const picturesPerPage = limit || 4;
-    const pictures = await this.getPicturesFromDB();
     let totalPages: number;
-
-    if (!pictures) {
-      return 0;
-    }
 
     const picturesTotal = await this.getPicturesAmount() || 0;
 
