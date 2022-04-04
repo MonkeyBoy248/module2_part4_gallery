@@ -38,9 +38,55 @@ body {
 
 .header__inner {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
   padding: 20px 0;
+}
+
+.header__title-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header__limit-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.header__limit-label {
+  color: #ffffff;
+}
+
+.header__limit-input {
+  width: 250px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 14px;
+  border: none;
+  color: #383838;
+}
+
+.header__limit-input::placeholder {
+  color: #383838;
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+.header__set-limit-button {
+  width: 150px;
+  padding: 8px;
+  color: #ffffff;
+  background-color: #d059e7;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: .3s ease-in-out;
+}
+
+.header__set-limit-button:hover {
+  background-color: #e9982d;
 }
 
 .header__upload-wrapper {
