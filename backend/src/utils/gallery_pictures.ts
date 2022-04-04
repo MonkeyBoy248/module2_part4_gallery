@@ -4,6 +4,8 @@ import {isNodeError} from "./error_type_check";
 import { paths } from "../config";
 import {imageModel} from "../db/models/picture_model";
 import {errorLog} from "./error_log";
+import {Stats} from "fs";
+import path from "path";
 
 export class Pictures {
   static async getPictures () {
@@ -17,39 +19,30 @@ export class Pictures {
     }
   }
 
-  static async getPicturesFromDB (page: number, limit: number) {
-    const picturesOnPage: object[] = [];
+  static async getPicturesAmount () {
+    return imageModel.count();
+  }
 
+  static async getPicturesFromDB () {
     try {
-      for (let i = (page - 1) * limit; i < page * limit; i++) {
-        const picture = await imageModel.findOne({id: `${i}`}) as object;
+      const pictures = await imageModel.find();
 
-        if (picture) {
-          picturesOnPage.push(picture);
-        }
-      }
-
-      return picturesOnPage;
+      return pictures;
     } catch (err) {
       await errorLog(err, `${setDateFormat()} ${this.getPictures.name}`)
     }
   }
 
-  static async getPicturesLength () {
-    const picturesLength = await imageModel.count();
-
-    try {
-      return picturesLength;
-    } catch (err) {
-      await errorLog(err, "Failed to get pictures amount")
-    }
-  }
-
   static async countTotalPagesAmount (limit: number): Promise<number> {
     const picturesPerPage = limit || 4;
+    const pictures = await this.getPicturesFromDB();
     let totalPages: number;
 
-    const picturesTotal = await this.getPicturesLength() || 0;
+    if (!pictures) {
+      return 0;
+    }
+
+    const picturesTotal = await this.getPicturesAmount() || 0;
 
     totalPages = picturesTotal % picturesPerPage === 0 ?
       Math.floor(picturesTotal / picturesPerPage)
@@ -57,6 +50,20 @@ export class Pictures {
       Math.floor(picturesTotal / picturesPerPage) + 1;
 
     return totalPages;
+  }
+
+  static getFileMetadata = async () => {
+    const { API_IMAGES_PATH } = paths;
+    const imageNames = await Pictures.getPictures();
+    const metadataArray: Stats[] = [];
+
+    if (imageNames) {
+      for (let name of imageNames) {
+        metadataArray.push(await fs.promises.stat(path.join(API_IMAGES_PATH, name)));
+      }
+    }
+
+    return metadataArray;
   }
 }
 
