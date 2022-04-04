@@ -1,9 +1,9 @@
-# MODULE-2-PART-3-gallery #
+# MODULE-2-PART-4-gallery #
 
-![GitHub issues](https://img.shields.io/github/issues/MonkeyBoy248/module2_part3_gallery)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/MonkeyBoy248/module2_part3_gallery)
+![GitHub issues](https://img.shields.io/github/issues/MonkeyBoy248/module2_part4_gallery)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/MonkeyBoy248/module2_part4_gallery)
 
-MODULE-2-PART-3-gallery - it's a fullstack application for watching cool disco pictures!
+MODULE-2-PART-4-gallery - it's a fullstack application for watching cool disco pictures!
 
 ## Project Status ##
 
@@ -17,6 +17,7 @@ In progress
 * TypeScript
 * NodeJS
 * Express
+* MongoDB, Mongoose
 
 ## Project Structure ##
 
