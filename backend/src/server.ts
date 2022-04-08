@@ -7,8 +7,8 @@ import { nonexistentPageHandler } from "./middleware/404_handler";
 import { paths } from "./config";
 import { Logger } from "./middleware/logger";
 import {connectDB} from "./db/db_connection";
-import {addUsersToDB} from "./db/db_controllers/user_controller";
-import {addImagesToDB, deleteNonexistentPicturesFromDB} from "./db/db_controllers/image_controller";
+import {addUsersToDB} from "./db/work_with_DB/work_with_users";
+import {addImagesToDB, deleteNonexistentPicturesFromDB} from "./db/work_with_DB/work_with_images";
 
 dotenv.config();
 
@@ -23,12 +23,6 @@ const protocol = process.env.PROTOCOL || 'http';
 const hostname = process.env.HOSTNAME || 'localhost';
 
 console.log('port', process.env.PORT);
-
-connectDB()
-  .then(() => addUsersToDB())
-  .then(() => deleteNonexistentPicturesFromDB())
-  .then(() => addImagesToDB())
-
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -46,5 +40,11 @@ app.use('/',
 
 app.use(nonexistentPageHandler);
 
-app.listen(port, () => console.log(`Server is running on port ${port}.
-${protocol}://${hostname}:${port}`));
+connectDB()
+  .then(() => addUsersToDB())
+  .then(() => deleteNonexistentPicturesFromDB())
+  .then(() => addImagesToDB())
+  .then(() => app.listen(port, () => console.log(`Server is running on port ${port}.
+${protocol}://${hostname}:${port}`)));
+
+
