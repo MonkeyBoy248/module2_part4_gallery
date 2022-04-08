@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import {setDateFormat, writeLogs} from "./log_format";
 import {isNodeError} from "./error_type_check";
 import { paths } from "../config";
-import {imageModel} from "../db/models/picture_model";
+import {pictureModel} from "../db/models/picture_model";
 import {errorLog} from "./error_log";
 import {Stats} from "fs";
 import path from "path";
@@ -20,12 +20,12 @@ export class Pictures {
   }
 
   static async getPicturesAmount () {
-    return imageModel.count();
+    return pictureModel.estimatedDocumentCount();
   }
 
   static async getPicturesFromDB (page: number, limit: number) {
     try {
-      const pictures = await imageModel.find({}, null, {skip: limit * page - limit, limit: limit});
+      const pictures = await pictureModel.find({}, null, {skip: limit * page - limit, limit: limit});
 
       return pictures;
     } catch (err) {

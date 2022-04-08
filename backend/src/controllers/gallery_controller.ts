@@ -5,7 +5,7 @@ import { GalleryObject } from "../interfaces/gallery_object";
 import { Pictures } from "../utils/gallery_pictures";
 import { checkAuthorizationHeader } from "../middleware/authentication";
 import { upload } from "../middleware/picture_upload";
-import { renameFile } from "../utils/filename_format";
+import { renameFileAndSaveToDB } from "../utils/filename_format";
 
 export class GalleryController implements Controller {
   public path = '/gallery';
@@ -55,6 +55,6 @@ export class GalleryController implements Controller {
   }
 
   private uploadUserPicture = async (req: Request, res: Response) => {
-    await renameFile(req, res);
+    await renameFileAndSaveToDB(req, res);
   }
 }
