@@ -3,7 +3,7 @@ import {Picture} from "../../interfaces/picture";
 
 const { Schema } = mongoose;
 
-const imageSchema = new Schema<Picture>(
+const pictureSchema = new Schema<Picture>(
   {
     id: String,
     path: String,
@@ -11,4 +11,4 @@ const imageSchema = new Schema<Picture>(
   }
 )
 
-export const imageModel = mongoose.model('Image', imageSchema);
+export const pictureModel = mongoose.model('Image', pictureSchema);
