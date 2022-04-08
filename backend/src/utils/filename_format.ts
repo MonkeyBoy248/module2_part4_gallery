@@ -5,11 +5,11 @@ import { Pictures } from "./gallery_pictures";
 import {setDateFormat} from "./log_format";
 import { paths } from "../config";
 import {errorLog} from "./error_log";
-import {addUserImageToDB} from "../db/db_controllers/image_controller";
+import {saveUserImageToDB} from "../db/work_with_DB/work_with_images";
 
 
 
-export async function renameFile (req: Request, res: Response) {
+export async function renameFileAndSaveToDB (req: Request, res: Response) {
   const pictureData = req.file;
   const picturesLength = await Pictures.getPicturesAmount();
 
@@ -24,7 +24,7 @@ export async function renameFile (req: Request, res: Response) {
       const metadata = await Pictures.getFileMetadata();
 
 
-      await addUserImageToDB(
+      await saveUserImageToDB(
         {
           id: `${picturesLength}_user`,
           path: pictureName,
@@ -35,7 +35,7 @@ export async function renameFile (req: Request, res: Response) {
       res.sendStatus(200);
     }
   } catch (err) {
-    await errorLog(err, `${setDateFormat()} ${renameFile.name}`);
+    await errorLog(err, `${setDateFormat()} ${renameFileAndSaveToDB.name}`);
 
     res.sendStatus(500);
   }
